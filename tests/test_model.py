@@ -1,17 +1,35 @@
+
+
+
+
+import pandas as pd
+
 import unittest
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-import os
+import pandas as pd
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # go one level up
-data_path = os.path.join(BASE_DIR, 'iris_model.pkl')
-model = joblib.load(data_path)
+data_path = 'model/iris_model.pkl'
+csv_path = 'data/iris.csv'
+
 
 class TestModelTraining(unittest.TestCase):
-    def test_model_training(self):
-        # model = joblib.load('iris_model.pkl')
-        self.assertIsInstance(model, RandomForestClassifier)
-        self.assertGreaterEqual(len(model.feature_importances_), 4)
+    @classmethod
+    def setUpClass(cls):
+        cls.model = joblib.load(data_path)
+        cls.iris_data = pd.read_csv(csv_path)
+
+    def test_model_instance(self):
+        self.assertIsInstance(self.model, RandomForestClassifier)
+
+    def test_feature_importances(self):
+        self.assertGreaterEqual(len(self.model.feature_importances_), 4)
+
+    def test_model_prediction(self):
+        # Use the first row of iris.csv for prediction
+        features = self.iris_data.iloc[0, :-1].values.reshape(1, -1)
+        pred = self.model.predict(features)
+        self.assertEqual(pred.shape, (1,))
 
 if __name__ == '__main__':
     unittest.main()
